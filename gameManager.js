@@ -103,7 +103,8 @@ export class GameManager {
     }
 
     const removeLine = this.map.addBlockToMap(this.block);
-    this.scoreManager.addScore(removeLine);    
+    this.effectManager.lineBreak(this.block.type, this.block.x, this.block.y, removeLine);
+    this.scoreManager.addScore(removeLine);
 
     const nextBlock = this.blockManager.getNextBlock();
     if(this.map.isIlligalPosition(nextBlock)) {
@@ -154,27 +155,22 @@ export class GameManager {
     // 게임 진행 중 스페이스 입력 시
     if(this.isGamePlaying()) {
       this.block.moveDownEnd();
-      this.map.toggleShake();
-      this.effectManager.addEffect(
-        this.block.getRealX(),
-        this.block.getRealY()
-      );
       this.changeCurrentBlock();
     }
 
   }
 
-  update() {
-    this.map.update();
+  update(time) {
+    this.map.update(time);
     if(this.isGamePlaying()) {
-      this.block.update();
+      this.block.update(time);
     }
-    this.effectManager.update();
-    this.blockManager.update();
-    this.scoreManager.update();
-    this.levelManager.update();
+    this.effectManager.update(time);
+    this.blockManager.update(time);
+    this.scoreManager.update(time);
+    this.levelManager.update(time);
     if(this.gameState === GAME_STATE.RESULTING) {
-      this.resultManager.update();
+      this.resultManager.update(time);
     }
 
   }

@@ -11,7 +11,8 @@ export const ROTATE = {
 
 export class Block {
 
-  constructor(context, x, y, type, map, blockCanvas, audioManager) {
+  constructor(context, x, y, type, map, blockCanvas, audioManager, app) {
+    this.app = app;
     this.ctx = context;
     this.x = x;
     this.y = y;
@@ -59,9 +60,9 @@ export class Block {
   draw() {    
 
     for(let i = 0; i < 4; i++) {      
-      if(this.y + RECT_TYPE[this.type][this.rotateState][i].y < 0) {
-        continue;
-      }
+      // if(this.y + RECT_TYPE[this.type][this.rotateState][i].y < 0) {
+      //   continue;
+      // }
       this.ctx.drawImage(
         this.blockCanvas.getCanvas(this.type),
         (this.x + RECT_TYPE[this.type][this.rotateState][i].x) * OPTIONS.baseBlockWidth + OPTIONS.mapX,
@@ -140,6 +141,8 @@ export class Block {
       this.audioManager.playBlockDownSound();
     }
     this.y = --targetY;
+    this.map.toggleShake();
+    this.app.effectManager.blockDown(this.type, this.x, this.y);
   }
 
   collisionCheck(toX, toY, toRotateState) {

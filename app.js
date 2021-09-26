@@ -39,6 +39,7 @@ export default class App {
     this.blockManager.reset();
     this.scoreManager.reset();
     this.levelManager.reset();
+    this.effectManager.reset();
     this.gameManager.reset();
   }
  
@@ -116,7 +117,7 @@ export default class App {
     window.requestAnimationFrame(this.animate.bind(this));
     this.context.clearRect(0, 0, this.stageWidth, this.stageHeight);
 
-    this.gameManager.update();
+    this.gameManager.update(Date.now());
     this.gameManager.draw();
   }
     

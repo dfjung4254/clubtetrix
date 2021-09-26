@@ -1,8 +1,21 @@
 import { RECT_STYLE } from "./blockConst.js";
 import OPTIONS from "./option.js";
 
+export const MAP = {
+  EMPTY: -1
+}
+
 export const MAP_STATE = {
-  EMPTY: -1,
+  DEFAULT: {
+    neon: false,
+  },
+  NEW_BLOCK: {
+    neon: true,
+    duration: 200,
+    startTime: 0,
+    opacity: 0,
+    opacityDirection: 1
+  }
 }
 
 export default class TetrisMap {
@@ -13,7 +26,11 @@ export default class TetrisMap {
     this.blockCanvas = app.blockCanvas;
     this.map = Array.from(
       Array(OPTIONS.heightLength), 
-      () => Array(OPTIONS.widthLength).fill(MAP_STATE.EMPTY)
+      () => Array(OPTIONS.widthLength).fill(MAP.EMPTY)
+    );
+    this.mapState = Array.from(
+        Array(OPTIONS.heightLength),
+        () => Array(OPTIONS.widthLength).fill(MAP_STATE.DEFAULT)
     );
     this.additionalOffsetX = 0;
     this.additionalOffsetY = 0;
@@ -21,12 +38,16 @@ export default class TetrisMap {
 
   removeBlockLine(yIdx) {
     for(let x = 0; x < this.map[yIdx].length; x++) {
-      this.map[yIdx][x] = MAP_STATE.EMPTY;
+      this.map[yIdx][x] = MAP.EMPTY;
+      this.mapState[yIdx][x] = {};
     }
     for(let y = yIdx; y > 0; y--) {
       const tmpLine = this.map[y - 1];
       this.map[y - 1] = this.map[y];
       this.map[y] = tmpLine;
+      const tmpLine2 = this.mapState[y - 1];
+      this.mapState[y - 1] = this.mapState[y];
+      this.mapState[y] = tmpLine2;
     }
     this.app.audioManager.playRemoveLineSound();
   }
@@ -34,7 +55,7 @@ export default class TetrisMap {
   checkBlockLine() {
     let removeCount = 0;
     for(let y = 0; y < this.map.length; y++) {
-      let isEmptyIn = this.map[y].some(type => type === MAP_STATE.EMPTY);
+      let isEmptyIn = this.map[y].some(type => type === MAP.EMPTY);
       if(!isEmptyIn) {
         this.removeBlockLine(y);
         y--;
@@ -50,6 +71,8 @@ export default class TetrisMap {
     positions.forEach((pos) => {
       try{
         this.map[pos.y][pos.x] = type;
+        this.mapState[pos.y][pos.x] = JSON.parse(JSON.stringify(MAP_STATE.NEW_BLOCK));
+        this.mapState[pos.y][pos.x].startTime = Date.now();
       }catch(e) {
 
       }
@@ -62,7 +85,7 @@ export default class TetrisMap {
   }
 
   isEmptyPos(x, y) {
-    return this.map[y][x] === MAP_STATE.EMPTY;
+    return this.map[y][x] === MAP.EMPTY;
   }
 
   isAvailablePos(x, y) {
@@ -81,7 +104,7 @@ export default class TetrisMap {
     for(let i = 0; i < positions.length; i++) {
       const pos = positions[i];
       try{
-        if(this.map[pos.y][pos.x] !== MAP_STATE.EMPTY) {
+        if(this.map[pos.y][pos.x] !== MAP.EMPTY) {
           return true;
         }
       }catch(e) {
@@ -109,12 +132,30 @@ export default class TetrisMap {
     }
   }
 
+  updateMapState(time) {
+    for(let y = 0; y < this.mapState.length; y++) {
+      for(let x = 0; x < this.mapState[y].length; x++) {
+        if(this.mapState[y][x].neon) {
+          if(this.mapState[y][x].startTime + this.mapState[y][x].duration <= time) {
+            this.mapState[y][x].neon = false;
+            console.log('false')
+          }
+          const opacityDuePower = 2 * (time - this.mapState[y][x].startTime) / this.mapState[y][x].duration;
+          this.mapState[y][x].opacity = opacityDuePower >= 1 ? 2 - opacityDuePower : opacityDuePower;
+        }
+      }
+    }
+
+
+  }
+
   toggleShake() {
     this.shake = true;
   }
 
-  update() {
+  update(time) {
     this.shakeMap();
+    this.updateMapState(time);
   }
 
   draw() {
@@ -150,8 +191,9 @@ export default class TetrisMap {
     this.ctx.stroke();
 
     // grid - vertical
+    this.ctx.globalAlpha = 0.2;
     for(let i = 1; i < this.map[0].length; i++) {
-      this.ctx.strokeStyle = '#FFFFFF99';
+      this.ctx.strokeStyle = '#FFFFFF';
       this.ctx.lineWidth = 0.5;
       this.ctx.beginPath();
       this.ctx.moveTo(x + OPTIONS.baseBlockWidth * i, y );
@@ -161,13 +203,14 @@ export default class TetrisMap {
 
     // grid - horizontal
     for(let i = 1; i < this.map.length; i++) {
-      this.ctx.strokeStyle = '#FFFFFF99';
+      this.ctx.strokeStyle = '#FFFFFF';
       this.ctx.lineWidth = 0.5;
       this.ctx.beginPath();
       this.ctx.moveTo(x, y + OPTIONS.baseBlockWidth * i);
       this.ctx.lineTo(x + width, y + OPTIONS.baseBlockWidth * i);
       this.ctx.stroke();
     }
+    this.ctx.globalAlpha = 1;
 
   }
 
@@ -175,15 +218,26 @@ export default class TetrisMap {
 
     for(let y = 0; y < this.map.length; y++) {
       for(let x = 0; x < this.map[y].length; x++) {        
-        if(this.map[y][x] !== MAP_STATE.EMPTY) {
-          const type = this.map[y][x];          
+        if(this.map[y][x] !== MAP.EMPTY) {
+          const type = this.map[y][x];
           this.ctx.drawImage(
             this.blockCanvas.getCanvas(type),
             x * OPTIONS.baseBlockWidth + OPTIONS.mapX + this.additionalOffsetX,
             y * OPTIONS.baseBlockWidth + OPTIONS.mapY + this.additionalOffsetY
           );
-
         }
+
+        if(this.mapState[y][x].neon) {
+          this.ctx.globalAlpha = this.mapState[y][x].opacity;
+          const type = this.map[y][x];
+          this.ctx.drawImage(
+            this.blockCanvas.getEffectCanvas(type),
+            x * OPTIONS.baseBlockWidth + OPTIONS.mapX + this.additionalOffsetX,
+            y * OPTIONS.baseBlockWidth + OPTIONS.mapY + this.additionalOffsetY
+          );
+          this.ctx.globalAlpha = 1;
+        }
+
       }
     }
 
@@ -192,7 +246,7 @@ export default class TetrisMap {
   reset() {
     this.map = Array.from(
       Array(OPTIONS.heightLength), 
-      () => Array(OPTIONS.widthLength).fill(MAP_STATE.EMPTY)
+      () => Array(OPTIONS.widthLength).fill(MAP.EMPTY)
     );
     this.additionalOffsetX = 0;
     this.additionalOffsetY = 0;

@@ -6,17 +6,17 @@ export default class BlockManager {
 
   constructor(app, size) {
     this.app = app;
-    this.queue = new Array();
     this.ctx = app.context;
     this.map = app.map;
     this.size = size;
     this.typeCount = Object.keys(RECT).length;
     this.blockCanvas = app.blockCanvas;
-
     this.initQueue();
   }
 
   initQueue() {
+    this.queue = new Array();
+    this.generatedBlockSet = new Array();
     for(let i = 0; i < this.size; i++) {
       this.pushNewBlock();
     }
@@ -29,8 +29,37 @@ export default class BlockManager {
   }
 
   pushNewBlock() {
-    const thisBlockType = this.getRandomInt(0, this.typeCount);
-    this.queue.push(new Block(this.ctx, OPTIONS.widthLength / 2, 0, thisBlockType, this.map, this.blockCanvas, this.app.audioManager));
+    const thisBlockType = this.getRandomNextBlock();
+    this.queue.push(new Block(this.ctx, OPTIONS.widthLength / 2, -2, thisBlockType, this.map, this.blockCanvas, this.app.audioManager, this.app));
+  }
+
+  getRandomNextBlock() {
+    if(this.generatedBlockSet.length === 0) {
+      this.generatedBlockSet = [];
+      for (let rectKey in RECT) {
+        this.generatedBlockSet.push(RECT[rectKey]);
+      }
+      this.shuffleBlockSet(this.generatedBlockSet);
+    }
+    return this.generatedBlockSet.shift();
+  }
+
+  shuffleBlockSet(array) {
+    let currentIndex = array.length,  randomIndex;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
   }
 
   getRandomInt(min, max) {
@@ -62,7 +91,6 @@ export default class BlockManager {
   }
   
   reset() {
-    this.queue = new Array();
     this.initQueue();
   }
 

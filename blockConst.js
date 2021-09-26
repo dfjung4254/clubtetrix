@@ -5,16 +5,22 @@ export class BlockImageCanvas {
 
   constructor(app) {
     this.app = app;
-    this.makeRectCanvas();
+    this.blockCanvas = [];
+    this.blockEffectCanvas = [];
+    this.makeRectCanvas(this.blockCanvas);
+    this.makeRectCanvas(this.blockEffectCanvas, RECT_EFFECT_STYLE);
   }
 
   getCanvas(type) {
     return this.blockCanvas[type];
   }
 
-  makeRectCanvas() {
+  getEffectCanvas(type) {
+      return this.blockEffectCanvas[type];
+  }
 
-    this.blockCanvas = new Array();
+  makeRectCanvas(canvasArray, style = RECT_STYLE) {
+
     const typeLength = Object.keys(RECT).length;
     const padding = 6;
     const baseX = padding / 2;
@@ -25,8 +31,8 @@ export class BlockImageCanvas {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
 
-      for(const key in RECT_STYLE[type]) {
-        context[key] = RECT_STYLE[type][key];
+      for(const key in style[type]) {
+        context[key] = style[type][key];
       }
 
       roundRect2(
@@ -38,7 +44,7 @@ export class BlockImageCanvas {
         3
       );
 
-      this.blockCanvas.push(canvas);
+      canvasArray.push(canvas);
     }
 
   }
@@ -109,7 +115,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // O
         fillStyle: 'rgb(222, 255, 255)',
@@ -118,7 +124,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // T
         fillStyle: 'rgb(255, 255, 222)',
@@ -127,7 +133,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // L
         fillStyle: 'rgb(222, 239, 239)',
@@ -136,7 +142,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // J
         fillStyle: 'rgb(222, 255, 239)',
@@ -145,7 +151,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // S
         fillStyle: 'rgb(255, 222, 222)',
@@ -154,7 +160,7 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     {   // Z
         fillStyle: 'rgb(239, 239, 222)',
@@ -163,9 +169,76 @@ export const RECT_STYLE = [
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowBlur: 10,
-        lineWidth: 4
+        lineWidth: 3
     },
     
+];
+
+export const RECT_EFFECT_STYLE = [
+  {   // I
+    fillStyle: 'rgb(239, 222, 255)',
+    strokeStyle: 'rgb(239, 222, 255)',
+    shadowColor: 'rgb(239, 222, 255)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // O
+    fillStyle: 'rgb(222, 255, 255)',
+    strokeStyle: 'rgb(222, 255, 255)',
+    shadowColor: 'rgb(222, 255, 255)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // T
+    fillStyle: 'rgb(255, 255, 222)',
+    strokeStyle: 'rgb(255, 255, 222)',
+    shadowColor: 'rgb(255, 255, 222)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // L
+    fillStyle: 'rgb(222, 239, 239)',
+    strokeStyle: 'rgb(222, 239, 239)',
+    shadowColor: 'rgb(222, 239, 239)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // J
+    fillStyle: 'rgb(222, 255, 239)',
+    strokeStyle: 'rgb(222, 255, 239)',
+    shadowColor: 'rgb(222, 255, 239)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // S
+    fillStyle: 'rgb(255, 222, 222)',
+    strokeStyle: 'rgb(255, 222, 222)',
+    shadowColor: 'rgb(255, 222, 222)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+  {   // Z
+    fillStyle: 'rgb(239, 239, 222)',
+    strokeStyle: 'rgb(239, 239, 222)',
+    shadowColor: 'rgb(239, 239, 222)',
+    shadowOffsetX: 0,
+    shadowOffsetY: 0,
+    shadowBlur: 10,
+    lineWidth: 10
+  },
+
 ];
 
 

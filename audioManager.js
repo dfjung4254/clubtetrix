@@ -16,7 +16,7 @@ export default class AudioManager {
   initBackgroundSound() {
     this.backgroundSound = new Audio();
     this.backgroundSound.src = SOUND_PATH.BACKGROUND;
-    this.backgroundSound.volume = 0.4;
+    this.backgroundSound.volume = 0.3;
     this.backgroundSound.loop = true;
   }
 
